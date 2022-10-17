@@ -13,15 +13,15 @@ const utils = require("@iobroker/adapter-core");
 const request = require('request');
 const {stat} = require("fs");
 
-const states = [
-    "lastUpdateTime",
-    "exportedEnergy",
-    "importedEnergy",
-    "pvProduction",
-    "batteryDischarge",
-    "batteryCharge",
-    "load"
-]
+const States = Object.freeze({
+    LAST_UPDATE_TIME: "lastUpdateTime",
+    EXPORTED_ENERGY: "exportedEnergy",
+    IMPORTED_ENERGY: "importedEnergy",
+    PV_PRODUCTION: "pvProduction",
+    BATTERY_DISCHARGE: "batteryDischarge",
+    BATTERY_CHARGE: "batteryCharge",
+    LOAD: "load"
+});
 
 
 /**
@@ -73,64 +73,19 @@ function checkStateCreationNeeded(stateName) {
 }
 
 function createStates() {
-    let callback = function (val) {
-    }
-
     adapter.log.debug("creating states");
 
-    adapter.createState('', siteid, 'lastUpdateTime', {
-        name: "lastUpdateTime",
-        type: 'string',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'Last update from inverter'
-    }, callback);
-
-    adapter.createState('', siteid, 'exportedEnergy', {
-        name: "exportedEnergy",
-        type: 'number',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'current exported energy'
-    }, callback);
-
-    adapter.createState('', siteid, 'importedEnergy', {
-        name: "importedEnergy",
-        type: 'number',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'current imported energy'
-    }, callback);
-
-    adapter.createState('', siteid, 'pvProduction', {
-        name: "pvProduction",
-        type: 'number',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'current pv production'
-    }, callback);
-
-    adapter.createState('', siteid, 'batteryCharge', {
-        name: "batteryCharge",
-        type: 'number',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'current battery charge'
-    }, callback);
-
-    adapter.createState('', siteid, 'load', {
-        name: "load",
-        type: 'number',
-        read: true,
-        write: false,
-        role: 'value',
-        desc: 'current load'
-    }, callback);
+    Object.keys(States).forEach(stateKey => {
+        let value = States[stateKey];
+        adapter.createState('', siteid, value, {
+            name: value,
+            type: value === States.LAST_UPDATE_TIME ? 'string' : 'number',
+            read: true,
+            write: false,
+            role: 'value',
+        }, () => {
+        });
+    });
 
     shouldCreateStates = false;
 }
@@ -196,8 +151,13 @@ function main() {
 
                         adapter.log.debug("updating states");
 
-                        adapter.setStateChanged(siteid + '.lastUpdateTime', overview.lastUpdateTime, true);
-                        adapter.setStateChanged(siteid + '.excessEnergy', overview.currentPower.power, true);
+                        adapter.setStateChanged(`${siteid}.${States.LAST_UPDATE_TIME}`, Date.now(), true);
+                        adapter.setStateChanged(`${siteid}.${States.PV_PRODUCTION}`, pvPower, true);
+                        adapter.setStateChanged(`${siteid}.${States.BATTERY_CHARGE}`, batteryCharge, true);
+                        adapter.setStateChanged(`${siteid}.${States.BATTERY_DISCHARGE}`, batteryDischarge, true);
+                        adapter.setStateChanged(`${siteid}.${States.IMPORTED_ENERGY}`, importedEnergy, true);
+                        adapter.setStateChanged(`${siteid}.${States.EXPORTED_ENERGY}`, exportedEnergy, true);
+                        adapter.setStateChanged(`${siteid}.${States.LOAD}`, load, true);
                     } else {
                         adapter.log.warn('Response has no valid content. Check your data and try again. ' + response.statusCode);
                     }
@@ -208,8 +168,7 @@ function main() {
                 adapter.log.info("Done, stopping...");
                 adapter.stop();
             }
-        )
-        ;
+        );
     }
 
 // (force) stop adapter after 15s
