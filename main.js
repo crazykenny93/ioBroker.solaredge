@@ -61,7 +61,7 @@ function startAdapter(options) {
 
 function checkStateCreationNeeded(stateName) {
     adapter.instance
-    adapter.getState('solaredge.' + adapter.instance + '.' + siteid + '.' + stateName, function (err, state) {
+    adapter.getState(`solaredge.${adapter.instance}.${siteid}.${stateName}`, function (err, state) {
         if (!state) {
             adapter.log.info("state " + stateName + " does not exist, will be created");
             shouldCreateStates = true;
@@ -104,8 +104,8 @@ function main() {
         const resource = "currentPowerFlow";
         const url = `https://monitoringapi.solaredge.com/site/${siteid}/${resource}.json?api_key=${apikey}`;
 
-        states.forEach(state => {
-            checkStateCreationNeeded(state);
+        Object.keys(States).forEach(state => {
+            checkStateCreationNeeded(States[state]);
         });
 
         request({
