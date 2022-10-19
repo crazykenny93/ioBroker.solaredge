@@ -14,7 +14,6 @@ const request = require('request');
 const {stat} = require("fs");
 
 const States = Object.freeze({
-    LAST_UPDATE_TIME: "lastUpdateTime",
     EXPORTED_ENERGY: "exportedEnergy",
     IMPORTED_ENERGY: "importedEnergy",
     PV_PRODUCTION: "pvProduction",
@@ -79,7 +78,7 @@ function createStates() {
         let value = States[stateKey];
         adapter.createState('', siteid, value, {
             name: value,
-            type: value === States.LAST_UPDATE_TIME ? 'string' : 'number',
+            type: value === 'number',
             read: true,
             write: false,
             role: 'value',
@@ -132,16 +131,16 @@ function main() {
 
                         adapter.log.info(JSON.stringify(content));
                         let storagePowerFlow = isKW ? currentPowerFlow.STORAGE.currentPower * 1000 : currentPowerFlow.STORAGE.currentPower;
-                        if (currentPowerFlow.connections.some(c => c === {from: "STORAGE", to: "Load"})) {
+                        if (currentPowerFlow.connections.some(c => c.from === "STORAGE" && c.to === "Load")) {
                             batteryDischarge = storagePowerFlow;
-                        } else if (currentPowerFlow.connections.indexOf({from: "LOAD", to: "Storage"}) !== -1) {
+                        } else if (currentPowerFlow.connections.some(c => c.from === "LOAD" && c.to === "Storage")) {
                             batteryCharge = storagePowerFlow;
                         }
 
                         let gridPowerFlow = isKW ? currentPowerFlow.GRID.currentPower * 1000 : currentPowerFlow.GRID.currentPower;
-                        if (currentPowerFlow.connections.indexOf({from: "GRID", to: "Load"}) !== -1) {
+                        if (currentPowerFlow.connections.some(c => c.from === "GRID" && c.to === "Load")) {
                             importedEnergy = gridPowerFlow;
-                        } else if (currentPowerFlow.connections.indexOf({from: "Load", to: "GRID"}) !== -1) {
+                        } else if (currentPowerFlow.connections.some(c => c.from === "LOAD" && c.to === "Grid")) {
                             exportedEnergy = gridPowerFlow;
                         }
 
@@ -156,7 +155,6 @@ function main() {
 
                         adapter.log.debug("updating states");
 
-                        adapter.setStateChanged(`${siteid}.${States.LAST_UPDATE_TIME}`, Date.now(), true);
                         adapter.setStateChanged(`${siteid}.${States.PV_PRODUCTION}`, pvPower, true);
                         adapter.setStateChanged(`${siteid}.${States.BATTERY_CHARGE}`, batteryCharge, true);
                         adapter.setStateChanged(`${siteid}.${States.BATTERY_DISCHARGE}`, batteryDischarge, true);
