@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "solaredge",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "news": {
             "0.2.0": {
                 "en": "Fix updating already created states and internal polishing"
