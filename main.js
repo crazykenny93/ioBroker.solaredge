@@ -93,7 +93,7 @@ function createStates() {
 function main() {
 
     siteid = adapter.config.siteid;
-    const apikey = adapter.config.apikey;
+    let apikey = adapter.config.apikey;
 
     adapter.log.info("site id: " + siteid);
     adapter.log.info("api key: " + (apikey ? (apikey.substring(0, 4) + "...") : "not set"));
@@ -131,16 +131,17 @@ function main() {
 
 
                         let storagePowerFlow = isKW ? currentPowerFlow.STORAGE.currentPower * 1000 : currentPowerFlow.STORAGE.currentPower;
-                        if (currentPowerFlow.connections.contains({from: "STORAGE", to: "Load"})) {
+                        console.log(typeof (currentPowerFlow.connections));
+                        if (currentPowerFlow.connections.indexOf({from: "STORAGE", to: "Load"}) !== -1) {
                             batteryDischarge = storagePowerFlow;
-                        } else if (currentPowerFlow.connections.contains({from: "LOAD", to: "Storage"})) {
+                        } else if (currentPowerFlow.connections.indexOf({from: "LOAD", to: "Storage"}) !== -1) {
                             batteryCharge = storagePowerFlow;
                         }
 
                         let gridPowerFlow = isKW ? currentPowerFlow.GRID.currentPower * 1000 : currentPowerFlow.GRID.currentPower;
-                        if (currentPowerFlow.connections.contains({from: "GRID", to: "Load"})) {
+                        if (currentPowerFlow.connections.indexOf({from: "GRID", to: "Load"}) !== -1) {
                             importedEnergy = gridPowerFlow;
-                        } else if (currentPowerFlow.connections.contains({from: "Load", to: "GRID"})) {
+                        } else if (currentPowerFlow.connections.indexOf({from: "Load", to: "GRID"}) !== -1) {
                             exportedEnergy = gridPowerFlow;
                         }
 
