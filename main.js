@@ -130,7 +130,7 @@ function main() {
                         let load = 0;
 
 
-                        console.info(JSON.stringify(content));
+                        adapter.log.info(JSON.stringify(content));
                         let storagePowerFlow = isKW ? currentPowerFlow.STORAGE.currentPower * 1000 : currentPowerFlow.STORAGE.currentPower;
                         if (currentPowerFlow.connections.indexOf({from: "STORAGE", to: "Load"}) !== -1) {
                             batteryDischarge = storagePowerFlow;
