@@ -130,8 +130,8 @@ function main() {
                         let load = 0;
 
 
+                        console.debug(JSON.stringify(content));
                         let storagePowerFlow = isKW ? currentPowerFlow.STORAGE.currentPower * 1000 : currentPowerFlow.STORAGE.currentPower;
-                        console.log(typeof (currentPowerFlow.connections));
                         if (currentPowerFlow.connections.indexOf({from: "STORAGE", to: "Load"}) !== -1) {
                             batteryDischarge = storagePowerFlow;
                         } else if (currentPowerFlow.connections.indexOf({from: "LOAD", to: "Storage"}) !== -1) {
@@ -148,6 +148,10 @@ function main() {
                         currentPowerFlow.connections.filter(c => c.to === "Load").forEach(c => {
                             load += currentPowerFlow[c.from].currentPower;
                         });
+
+                        if (isKW) {
+                            load *= 1000;
+                        }
 
 
                         adapter.log.debug("updating states");
