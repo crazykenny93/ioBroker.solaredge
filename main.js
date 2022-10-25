@@ -165,7 +165,9 @@ function main() {
                         adapter.log.warn('Response has no valid content. Check your data and try again. ' + response.statusCode);
                     }
                 } else {
-                    adapter.log.warn(error);
+                    adapter.log.warn(response.statusCode);
+                    adapter.log.warn("Content: " + JSON.stringify(content));
+                    adapter.log.warn("Error: " + error);
                 }
 
                 adapter.log.info("Done, stopping...");
