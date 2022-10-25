@@ -128,14 +128,14 @@ function main() {
                         let importedEnergy = 0;
                         let exportedEnergy = 0;
                         let batterySoC = currentPowerFlow.STORAGE.chargeLevel;
-                        let load = 0;
+                        let load;
 
 
                         adapter.log.info(JSON.stringify(content));
                         let storagePowerFlow = isKW ? currentPowerFlow.STORAGE.currentPower * 1000 : currentPowerFlow.STORAGE.currentPower;
                         if (currentPowerFlow.connections.some(c => c.from === "STORAGE" && c.to === "Load")) {
                             batteryDischarge = storagePowerFlow;
-                        } else if (currentPowerFlow.connections.some(c => c.from === "LOAD" && c.to === "Storage")) {
+                        } else if (currentPowerFlow.connections.some(c => c.from === "PV" && c.to === "Storage")) {
                             batteryCharge = storagePowerFlow;
                         }
 
@@ -146,16 +146,7 @@ function main() {
                             exportedEnergy = gridPowerFlow;
                         }
 
-                        currentPowerFlow.connections.filter(c => c.to === "Load").forEach(c => {
-                            load += currentPowerFlow[c.from].currentPower;
-                        });
-
-                        if (isKW) {
-                            load *= 1000;
-                        }
-
-
-                        adapter.log.debug("updating states");
+                        load = isKW ? currentPowerFlow["LOAD"].currentPower * 1000 : currentPowerFlow["LOAD"].currentPower;
 
                         adapter.setStateChanged(`${siteid}.${States.PV_PRODUCTION}`, pvPower, true);
                         adapter.setStateChanged(`${siteid}.${States.BATTERY_CHARGE}`, batteryCharge, true);
