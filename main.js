@@ -15,6 +15,7 @@ const {stat} = require("fs");
 
 const States = Object.freeze({
     EXPORTED_ENERGY: "exportedEnergy",
+    BATTERY_SOC: "batterySoC",
     IMPORTED_ENERGY: "importedEnergy",
     PV_PRODUCTION: "pvProduction",
     BATTERY_DISCHARGE: "batteryDischarge",
@@ -126,6 +127,7 @@ function main() {
                         let batteryCharge = 0;
                         let importedEnergy = 0;
                         let exportedEnergy = 0;
+                        let batterySoC = currentPowerFlow.STORAGE.chargeLevel;
                         let load = 0;
 
 
@@ -160,6 +162,7 @@ function main() {
                         adapter.setStateChanged(`${siteid}.${States.BATTERY_DISCHARGE}`, batteryDischarge, true);
                         adapter.setStateChanged(`${siteid}.${States.IMPORTED_ENERGY}`, importedEnergy, true);
                         adapter.setStateChanged(`${siteid}.${States.EXPORTED_ENERGY}`, exportedEnergy, true);
+                        adapter.setStateChanged(`${siteid}.${States.BATTERY_SOC}`, batterySoC, true);
                         adapter.setStateChanged(`${siteid}.${States.LOAD}`, load, true);
                     } else {
                         adapter.log.warn('Response has no valid content. Check your data and try again. ' + response.statusCode);
